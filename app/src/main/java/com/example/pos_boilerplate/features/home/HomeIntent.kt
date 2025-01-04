@@ -5,6 +5,6 @@ import com.example.pos_boilerplate.core.domain.model.Product
 
 sealed class HomeIntent : Intent {
     data object GetProductList : HomeIntent()
-    data object GetCartList : HomeIntent()
+    data object GetTotalCart : HomeIntent()
     data class AddToCart(val item: Product) : HomeIntent()
 }

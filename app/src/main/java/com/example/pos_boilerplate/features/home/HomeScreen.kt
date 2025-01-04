@@ -1,5 +1,6 @@
 package com.example.pos_boilerplate.features.home
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -37,7 +38,7 @@ import com.example.pos_boilerplate.features.home.components.OrderList
 import com.example.pos_boilerplate.features.home.components.ProductItem
 import org.koin.androidx.compose.koinViewModel
 
-@ExperimentalMaterial3Api
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
@@ -46,12 +47,9 @@ fun HomeScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    println("ASUUUU 1")
-
     LaunchedEffect(Unit) {
-        println("ASUUUU 2")
         viewModel.sendIntent(HomeIntent.GetProductList)
-        viewModel.sendIntent(HomeIntent.GetCartList)
+        viewModel.sendIntent(HomeIntent.GetTotalCart)
     }
 
     Scaffold(
@@ -64,12 +62,12 @@ fun HomeScreen(
                             badge = {
                                 when (val carts = state.asyncCartList) {
                                     is Async.Success -> {
-                                        if (carts.data.isNotEmpty()) {
+                                        if (carts.data != 0) {
                                             Badge(
                                                 containerColor = Color.Red,
                                                 contentColor = Color.White,
                                             ) {
-                                                Text("${carts.data.size}")
+                                                Text("${carts.data}")
                                             }
                                         }
                                     }
@@ -97,7 +95,7 @@ fun HomeScreen(
         }
     ) { paddingValues ->
         LazyVerticalGrid(
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
             columns = GridCells.Fixed(2),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),

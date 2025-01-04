@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface CartRepository {
     fun getCartList(): Flow<Async<List<Cart>>>
+    fun getTotalCart(): Flow<Async<Int>>
     fun addToCart(product: Product): Flow<Async<Unit>>
     fun removeFromCart(cart: Cart): Flow<Async<Unit>>
     fun updateQuantity(cart: Cart): Flow<Async<Unit>>

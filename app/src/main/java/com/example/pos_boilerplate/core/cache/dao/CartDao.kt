@@ -15,6 +15,9 @@ interface CartDao {
     @Query("SELECT * FROM carts ORDER BY createdAt ASC")
     fun getCartList(): Flow<List<CartEntity>>
 
+    @Query("SELECT SUM(quantity) FROM carts")
+    fun getTotalCart(): Flow<Int?>
+
     @Query("SELECT * FROM carts WHERE productId = :productId")
     suspend fun getCartItem(productId: Int): CartEntity?
 

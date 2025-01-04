@@ -26,6 +26,21 @@ class CartRepositoryImpl(private val cartDao: CartDao) : Repository(), CartRepos
         }
     }
 
+    override fun getTotalCart(): Flow<Async<Int>> = flow {
+        emit(Async.Loading)
+        try {
+            cartDao.getTotalCart().collect {
+                if (it == null) {
+                    emit(Async.Success(0))
+                } else {
+                    emit(Async.Success(it))
+                }
+            }
+        } catch (e: Exception) {
+            emit(Async.Failure(e))
+        }
+    }
+
     override fun addToCart(product: Product): Flow<Async<Unit>> = reduce {
         cartDao.getCartItem(product.id)?.let { existingItem ->
             // Update existing item

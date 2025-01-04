@@ -21,12 +21,12 @@ class HomeViewModel(
                 getProductList()
             }
 
-            is HomeIntent.GetCartList -> {
-                getCartList()
+            is HomeIntent.GetTotalCart -> {
+                getTotalCart()
             }
 
             is HomeIntent.AddToCart -> {
-                addToCart(item = intent.item)
+                addToCart(intent.item)
             }
         }
     }
@@ -43,9 +43,9 @@ class HomeViewModel(
         }
     }
 
-    private fun getCartList() {
+    private fun getTotalCart() {
         viewModelScope.launch {
-            cartRepository.getCartList()
+            cartRepository.getTotalCart()
                 .stateIn(this)
                 .collectLatest {
                     update {
