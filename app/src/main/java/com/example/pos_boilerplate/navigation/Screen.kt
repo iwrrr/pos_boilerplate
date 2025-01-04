@@ -19,7 +19,7 @@ sealed interface Destination {
     data object History : Destination
 
     @Serializable
-    data object Test : Destination
+    data class Receipt(val receiptId: String) : Destination
 
     @Serializable
     data object CartGraph : Destination {

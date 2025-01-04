@@ -4,13 +4,18 @@ import androidx.lifecycle.viewModelScope
 import com.example.pos_boilerplate.core.common.viewmodel.Intent
 import com.example.pos_boilerplate.core.common.viewmodel.ViewModelState
 import com.example.pos_boilerplate.core.domain.model.Cart
+import com.example.pos_boilerplate.core.domain.model.Checkout
+import com.example.pos_boilerplate.core.domain.model.PaymentMethod
 import com.example.pos_boilerplate.core.domain.repository.CartRepository
+import com.example.pos_boilerplate.core.domain.repository.ReceiptRepository
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class CartViewModel(
-    private val cartRepository: CartRepository
+    private val cartRepository: CartRepository,
+    private val receiptRepository: ReceiptRepository
 ) : ViewModelState<CartState, CartIntent>(CartState()) {
 
     override fun sendIntent(intent: Intent) {
@@ -34,6 +39,10 @@ class CartViewModel(
 
             is CartIntent.RemoveFromCart -> {
                 removeFromCart(intent.cart)
+            }
+
+            is CartIntent.Checkout -> {
+                checkout(intent.cartList)
             }
         }
     }
@@ -83,6 +92,24 @@ class CartViewModel(
                 .collectLatest {
                     update {
                         copy(asyncRemoveFromCart = it)
+                    }
+                }
+        }
+    }
+
+    private fun checkout(cartList: List<Cart>) {
+        viewModelScope.launch {
+            receiptRepository.checkout(
+                Checkout(
+                    items = cartList,
+                    paymentMethod = PaymentMethod.Cash,
+                    totalAmount = cartList.sumOf { it.subtotal }
+                ),
+            )
+                .stateIn(this)
+                .collectLatest {
+                    update {
+                        copy(asyncCheckout = it)
                     }
                 }
         }

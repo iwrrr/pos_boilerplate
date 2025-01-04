@@ -19,7 +19,7 @@ interface ReceiptDao {
 
     @Transaction
     @Query("SELECT * FROM receipts WHERE id = :id")
-    fun getReceiptById(id: String) : Flow<List<ReceiptWithItemsEntity>>
+    fun getReceiptById(id: String) : Flow<ReceiptWithItemsEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReceipt(receiptEntity: ReceiptEntity)

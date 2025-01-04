@@ -2,35 +2,21 @@ package com.example.pos_boilerplate.features.cart
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
-import androidx.compose.material.icons.rounded.DeleteOutline
-import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonColors
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,28 +24,41 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import com.example.pos_boilerplate.core.common.state.Async
-import com.example.pos_boilerplate.core.common.utils.toRupiah
 import com.example.pos_boilerplate.features.cart.components.CartItem
-import com.example.pos_boilerplate.features.cart.components.QuantityButton
 import org.koin.androidx.compose.koinViewModel
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartListScreen(
     viewModel: CartViewModel = koinViewModel(),
-    onBackClick: () -> Unit
+    navigateToReceipt: (receiptId: String) -> Unit,
+    navigateBack: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.sendIntent(CartIntent.GetCartList)
+    }
+
+    LaunchedEffect(state.asyncCheckout) {
+        when (val async = state.asyncCheckout) {
+            is Async.Default -> {
+                Timber.d("ASUUUUU ======> DEFAULT")
+            }
+            is Async.Loading -> {
+                Timber.d("ASUUUUU ======> LOADING")
+            }
+            is Async.Success -> {
+                navigateToReceipt(async.data)
+            }
+            is Async.Failure -> {
+                Timber.d("ASUUUUU ======> FAILURE: ${async.throwable}")
+            }
+        }
     }
 
     Scaffold(
@@ -69,7 +68,7 @@ fun CartListScreen(
                     Text(text = "Keranjang")
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
+                    IconButton(onClick = navigateBack) {
                         Icon(
                             imageVector = Icons.Rounded.ArrowBackIosNew,
                             contentDescription = null
@@ -87,7 +86,9 @@ fun CartListScreen(
                         ) {
                             Button(
                                 modifier = Modifier.fillMaxWidth(),
-                                onClick = {}
+                                onClick = {
+                                    viewModel.sendIntent(CartIntent.Checkout(cartList.data))
+                                }
                             ) {
                                 Text(text = "Checkout")
                             }
@@ -104,7 +105,7 @@ fun CartListScreen(
             modifier = Modifier.padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            when (val cartList = state.asyncCartList) {
+            when (val async = state.asyncCartList) {
                 is Async.Default -> {
                     item {
                         Box(
@@ -128,7 +129,7 @@ fun CartListScreen(
                 }
 
                 is Async.Success -> {
-                    items(cartList.data) { cart ->
+                    items(async.data) { cart ->
                         CartItem(
                             cart = cart,
                             onReduceClick = {

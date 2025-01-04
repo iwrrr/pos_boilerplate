@@ -1,4 +1,4 @@
-package com.example.pos_boilerplate.core.cache.model
+package com.example.pos_boilerplate.core.domain.model
 
 data class ReceiptItem(
     val id: Int,

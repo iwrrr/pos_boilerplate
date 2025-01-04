@@ -1,12 +1,12 @@
 package com.example.pos_boilerplate.core.data.mapper
 
-import com.example.pos_boilerplate.core.cache.model.ReceiptItem
+import com.example.pos_boilerplate.core.domain.model.ReceiptItem
 import com.example.pos_boilerplate.core.cache.model.ReceiptItemEntity
 import com.example.pos_boilerplate.core.cache.model.ReceiptWithItemsEntity
-import com.example.pos_boilerplate.core.domain.model.ReceiptWithItems
+import com.example.pos_boilerplate.core.domain.model.Receipt
 
-fun ReceiptWithItemsEntity.toDomain(): ReceiptWithItems {
-    return ReceiptWithItems(
+fun ReceiptWithItemsEntity.toDomain(): Receipt {
+    return Receipt(
         id = receipt.id,
         totalAmount = receipt.totalAmount,
         paymentMethod = receipt.paymentMethod,

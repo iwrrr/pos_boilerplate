@@ -8,4 +8,5 @@ sealed class CartIntent : Intent {
     data class AddQuantity(val cart: Cart) : CartIntent()
     data class ReduceQuantity(val cart: Cart) : CartIntent()
     data class RemoveFromCart(val cart: Cart) : CartIntent()
+    data class Checkout(val cartList: List<Cart>) : CartIntent()
 }

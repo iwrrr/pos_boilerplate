@@ -7,7 +7,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,11 +21,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.example.pos_boilerplate.features.cart.CartListScreen
+import com.example.pos_boilerplate.features.receipt.ReceiptScreen
 import com.example.pos_boilerplate.navigation.Destination
 import com.example.pos_boilerplate.navigation.MainScreen
 import com.example.pos_boilerplate.ui.theme.PosTheme
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.KoinContext
 
 @ExperimentalMaterial3Api
 class MainActivity : ComponentActivity() {
@@ -35,7 +37,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PosTheme {
-                MainApp()
+                KoinContext {
+                    MainApp()
+                }
             }
         }
     }
@@ -54,33 +58,35 @@ fun MainApp() {
         composable<Destination.Main> {
             MainScreen(
                 onProductClick = {
-                    navController.navigate(Destination.Test)
+                    navController.navigate(Destination.Receipt("0"))
                 },
                 onCartClick = {
                     navController.navigate(Destination.CartGraph.CartList)
                 }
             )
         }
-        composable<Destination.Test> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Button(
-                    onClick = {
-                        navController.navigateUp()
+        composable<Destination.Receipt> {
+            val args = it.toRoute<Destination.Receipt>()
+            ReceiptScreen(
+                receiptId = args.receiptId,
+                navigateBack = {
+                    navController.navigate(Destination.Main) {
+                        popUpTo(Destination.Main) {
+                            inclusive = true
+                        }
                     }
-                ) {
-                    Text(text = "Back to prev screen")
-                }
-            }
+                },
+            )
         }
         navigation<Destination.CartGraph>(
             startDestination = Destination.CartGraph.CartList,
         ) {
             composable<Destination.CartGraph.CartList> {
                 CartListScreen(
-                    onBackClick = {
+                    navigateToReceipt = {
+                        navController.navigate(Destination.Receipt(it))
+                    },
+                    navigateBack = {
                         navController.navigateUp()
                     }
                 )
